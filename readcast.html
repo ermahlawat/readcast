@@ -1,0 +1,640 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="theme-color" content="#ffffff">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="ReadCast">
+<title>ReadCast</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,600;1,9..144,400&family=Instrument+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --white:#fff;--off:#f6f4f1;--border:#e3deda;--border2:#ccc8c2;
+  --text:#1c1916;--mid:#5c554e;--light:#9e968e;
+  --blue:#2563a8;--blue-h:#1d4f8a;--blue-bg:#eff5ff;
+  --green:#1e7a50;--green-bg:#eef6f1;
+  --red:#c03030;--red-bg:#fff0f0;
+  --yellow-bg:#fffcee;--yellow-b:#e0cf60;
+  --r:10px;
+}
+html,body{background:var(--off);font-family:'Instrument Sans',system-ui,sans-serif;color:var(--text);-webkit-font-smoothing:antialiased}
+.app{max-width:600px;margin:0 auto;padding-bottom:240px;min-height:100svh}
+
+/* Header */
+.hdr{background:var(--white);border-bottom:1px solid var(--border);padding:15px 20px;position:sticky;top:0;z-index:10;display:flex;align-items:center;justify-content:space-between}
+.logo{font-family:'Fraunces',serif;font-size:21px;font-weight:600;font-style:italic;color:var(--text)}
+.logo em{font-style:normal;color:var(--blue)}
+.hdr-sub{font-size:11px;font-weight:500;color:var(--light);letter-spacing:.05em;text-transform:uppercase}
+
+/* Cards */
+.card{background:var(--white);border:1px solid var(--border);border-radius:var(--r);margin:14px 14px 0}
+.card-head{padding:14px 16px 0;font-size:11px;font-weight:600;letter-spacing:.07em;text-transform:uppercase;color:var(--light)}
+
+/* Tabs */
+.tabs{display:flex;gap:6px;padding:12px 16px 0}
+.tab{padding:9px 18px;font-family:'Instrument Sans',sans-serif;font-size:14px;font-weight:500;border:1.5px solid var(--border);border-radius:24px;cursor:pointer;background:transparent;color:var(--mid);transition:all .15s}
+.tab.on{background:var(--blue);border-color:var(--blue);color:#fff}
+
+/* Inputs */
+.inp-wrap{padding:12px 16px 16px}
+textarea,input[type=text],input[type=password]{
+  width:100%;font-family:'Instrument Sans',sans-serif;font-size:15px;line-height:1.65;
+  color:var(--text);background:var(--off);border:1.5px solid var(--border);border-radius:8px;
+  padding:12px 14px;outline:none;resize:none;transition:border-color .15s,background .15s;
+  caret-color:var(--blue);-webkit-appearance:none;appearance:none
+}
+textarea{height:130px}
+textarea:focus,input:focus{border-color:var(--blue);background:var(--white)}
+textarea::placeholder,input::placeholder{color:var(--light)}
+.hint{font-size:12px;color:var(--light);margin-top:8px;line-height:1.5}
+
+/* Mode buttons */
+.mode-row{display:flex;gap:8px;padding:12px 16px 16px}
+.mode-btn{
+  flex:1;display:flex;flex-direction:column;align-items:center;gap:6px;
+  padding:14px 8px;border:1.5px solid var(--border);border-radius:8px;cursor:pointer;
+  background:var(--white);font-family:'Instrument Sans',sans-serif;font-size:14px;
+  font-weight:500;color:var(--mid);transition:all .15s
+}
+.mode-btn .ico{font-size:22px}
+.mode-btn.on{border-color:var(--blue);background:var(--blue-bg);color:var(--blue)}
+
+/* AI provider section */
+.ai-section{display:none;padding:0 16px 16px;border-top:1px solid var(--border);padding-top:14px}
+.ai-section.show{display:block}
+.ai-label{font-size:12px;font-weight:600;color:var(--mid);margin-bottom:8px}
+
+/* Provider toggle */
+.provider-row{display:flex;gap:6px;margin-bottom:10px}
+.prov-btn{
+  flex:1;padding:8px 4px;font-family:'Instrument Sans',sans-serif;font-size:13px;
+  font-weight:500;border:1.5px solid var(--border);border-radius:7px;cursor:pointer;
+  background:var(--white);color:var(--mid);transition:all .15s;text-align:center
+}
+.prov-btn.on{border-color:var(--blue);background:var(--blue-bg);color:var(--blue)}
+
+.api-note{font-size:12px;color:var(--light);margin-top:8px;line-height:1.55}
+.api-note a{color:var(--blue);text-decoration:none}
+
+/* Action button */
+.btn-wrap{padding:14px 16px}
+.go-btn{
+  width:100%;padding:16px;font-family:'Instrument Sans',sans-serif;font-size:16px;font-weight:600;
+  background:var(--blue);color:#fff;border:none;border-radius:8px;cursor:pointer;
+  display:flex;align-items:center;justify-content:center;gap:10px;transition:all .15s
+}
+.go-btn:hover{background:var(--blue-h)}
+.go-btn:active{transform:scale(.99)}
+.go-btn:disabled{opacity:.45;cursor:not-allowed;transform:none}
+@keyframes spin{to{transform:rotate(360deg)}}
+.spinner{width:18px;height:18px;border:2.5px solid rgba(255,255,255,.35);border-top-color:#fff;border-radius:50%;animation:spin .65s linear infinite;display:none}
+.go-btn.loading .spinner{display:block}
+
+/* Status */
+.status{margin:10px 14px 0;padding:12px 16px;border-radius:8px;font-size:14px;font-weight:500;line-height:1.45;display:none}
+.status.show{display:block}
+.status.ok{background:var(--green-bg);color:var(--green);border:1px solid #b8dfc8}
+.status.err{background:var(--red-bg);color:var(--red);border:1px solid #f0c0c0}
+.status.info{background:var(--yellow-bg);color:#7a6010;border:1px solid var(--yellow-b)}
+
+/* Output */
+.out-card{background:var(--white);border:1px solid var(--border);border-radius:var(--r);margin:14px 14px 0;display:none}
+.out-card.show{display:block}
+.out-head{padding:12px 16px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between}
+.out-title{font-size:11px;font-weight:600;letter-spacing:.07em;text-transform:uppercase;color:var(--light)}
+.wc{font-size:12px;color:var(--light)}
+.out-body{
+  padding:18px;max-height:260px;overflow-y:auto;
+  font-family:'Fraunces',serif;font-size:16px;line-height:1.85;color:var(--text)
+}
+.out-body p{margin-bottom:1em}
+.out-body p:last-child{margin-bottom:0}
+
+/* ── Player (fixed) ── */
+.player{
+  position:fixed;bottom:0;left:0;right:0;
+  background:var(--white);border-top:2px solid var(--border);
+  box-shadow:0 -4px 24px rgba(0,0,0,.09);
+  padding:14px 18px max(16px,env(safe-area-inset-bottom));
+  display:none;flex-direction:column;gap:11px;z-index:30
+}
+.player.show{display:flex}
+
+/* Voice + speed */
+.top-row{display:flex;align-items:center;gap:10px}
+.voice-wrap{flex:1;position:relative}
+select{
+  width:100%;font-family:'Instrument Sans',sans-serif;font-size:13px;font-weight:500;
+  color:var(--text);background:var(--off);border:1.5px solid var(--border);
+  border-radius:7px;padding:9px 28px 9px 11px;outline:none;cursor:pointer;
+  -webkit-appearance:none;appearance:none
+}
+select:focus{border-color:var(--blue)}
+.sel-arrow{position:absolute;right:9px;top:50%;transform:translateY(-50%);pointer-events:none;color:var(--light);font-size:11px}
+.speed-badge{font-size:13px;font-weight:600;color:var(--mid);min-width:38px;text-align:right}
+
+/* Speed slider */
+.spd-row{display:flex;align-items:center;gap:8px}
+.spd-lbl{font-size:11px;color:var(--light)}
+input[type=range]{
+  flex:1;-webkit-appearance:none;appearance:none;height:4px;
+  background:var(--border);border-radius:4px;outline:none;cursor:pointer;padding:0;border:none
+}
+input[type=range]::-webkit-slider-thumb{
+  -webkit-appearance:none;width:18px;height:18px;
+  background:var(--blue);border-radius:50%;cursor:pointer;border:none
+}
+
+/* Progress */
+.prog-row{display:flex;align-items:center;gap:10px}
+.prog-bar{flex:1;height:5px;background:var(--border);border-radius:5px;cursor:pointer;position:relative;overflow:hidden}
+.prog-fill{height:100%;background:var(--blue);border-radius:5px;width:0%;transition:width .3s linear;pointer-events:none}
+.tlbl{font-size:11px;color:var(--light);white-space:nowrap;font-variant-numeric:tabular-nums}
+
+/* Controls */
+.ctrl-row{display:flex;align-items:center;justify-content:center;gap:6px}
+.ctrl{
+  border:none;background:none;cursor:pointer;border-radius:50%;
+  width:46px;height:46px;display:flex;align-items:center;justify-content:center;
+  font-size:18px;color:var(--mid);transition:all .12s
+}
+.ctrl:hover{background:var(--off);color:var(--text)}
+.play{
+  width:58px;height:58px;background:var(--blue);color:#fff;font-size:22px;
+  box-shadow:0 3px 14px rgba(37,99,168,.28)
+}
+.play:hover{background:var(--blue-h)}
+.play:active{transform:scale(.96)}
+
+/* Scrollbar */
+::-webkit-scrollbar{width:5px}
+::-webkit-scrollbar-track{background:transparent}
+::-webkit-scrollbar-thumb{background:var(--border2);border-radius:3px}
+</style>
+</head>
+<body>
+<div class="app">
+
+  <div class="hdr">
+    <div class="logo">Read<em>Cast</em></div>
+    <div class="hdr-sub">Article Reader</div>
+  </div>
+
+  <!-- Source -->
+  <div class="card">
+    <div class="card-head">Source</div>
+    <div class="tabs">
+      <button class="tab on" id="tabText" onclick="switchTab('text')">✏️ Paste Text</button>
+      <button class="tab"    id="tabUrl"  onclick="switchTab('url')">🔗 From URL</button>
+    </div>
+    <div class="inp-wrap" id="textWrap">
+      <textarea id="textInput" placeholder="Paste any article here — even if it includes nav menus, ads and other clutter. The app will automatically strip the noise and keep only the real content."></textarea>
+    </div>
+    <div class="inp-wrap" id="urlWrap" style="display:none">
+      <input type="text" id="urlInput" placeholder="https://example.com/article">
+      <p class="hint">Fetches via a free CORS proxy and strips ads, nav and boilerplate.</p>
+    </div>
+  </div>
+
+  <!-- Mode -->
+  <div class="card">
+    <div class="card-head">Mode</div>
+    <div class="mode-row">
+      <button class="mode-btn on" id="modeRead" onclick="setMode('read')"><span class="ico">📖</span>Read Full Text</button>
+      <button class="mode-btn"    id="modeSum"  onclick="setMode('sum')"><span class="ico">✨</span>AI Summary</button>
+    </div>
+
+    <div class="ai-section show" id="aiSection">
+      <div class="ai-label">AI Provider — used for both extraction and summary (both free)</div>
+      <div class="provider-row">
+        <button class="prov-btn on" id="provGroq"   onclick="setProv('groq')">⚡ Groq<br><small style="font-weight:400;font-size:11px">Llama 3 · Fast</small></button>
+        <button class="prov-btn"    id="provGemini" onclick="setProv('gemini')">🌐 Gemini<br><small style="font-weight:400;font-size:11px">Google · Generous</small></button>
+      </div>
+      <div class="ai-label">API Key</div>
+      <input type="password" id="apiKey" placeholder="Paste your key here…">
+      <p class="api-note" id="apiNote">
+        Get a <strong>free</strong> Groq key (no credit card) at <a href="https://console.groq.com" target="_blank">console.groq.com</a> → API Keys.
+      </p>
+    </div>
+  </div>
+
+  <!-- Go -->
+  <div class="card">
+    <div class="btn-wrap">
+      <button class="go-btn" id="goBtn" onclick="go()">
+        <div class="spinner"></div>
+        <span id="goBtnLabel">Extract &amp; Prepare Audio</span>
+      </button>
+    </div>
+  </div>
+
+  <div class="status" id="status"></div>
+
+  <!-- Output -->
+  <div class="out-card" id="outCard">
+    <div class="out-head">
+      <div class="out-title" id="outTitle">Extracted Text</div>
+      <div class="wc" id="wc"></div>
+    </div>
+    <div class="out-body" id="outBody"></div>
+  </div>
+
+</div>
+
+<!-- Player -->
+<div class="player" id="player">
+  <div class="top-row">
+    <div class="voice-wrap">
+      <select id="voiceSel"></select>
+      <span class="sel-arrow">▾</span>
+    </div>
+    <div class="speed-badge" id="spdBadge">1.0×</div>
+  </div>
+  <div class="spd-row">
+    <span class="spd-lbl">Slow</span>
+    <input type="range" id="spdSlider" min="0.5" max="2.5" step="0.1" value="1.0" oninput="onSpd(this.value)">
+    <span class="spd-lbl">Fast</span>
+  </div>
+  <div class="prog-row">
+    <span class="tlbl" id="tEl">0:00</span>
+    <div class="prog-bar" id="progBar" onclick="seek(event)">
+      <div class="prog-fill" id="progFill"></div>
+    </div>
+    <span class="tlbl" id="tRem">0:00</span>
+  </div>
+  <div class="ctrl-row">
+    <button class="ctrl" onclick="rewind()" title="Back">⏮</button>
+    <button class="ctrl play" id="playBtn" onclick="togglePlay()">▶</button>
+    <button class="ctrl" onclick="ffwd()" title="Forward">⏭</button>
+    <button class="ctrl" onclick="stopAll()" title="Stop">⏹</button>
+  </div>
+</div>
+
+<script>
+// ── globals ──────────────────────────────────────────────────────────────
+var synth, voices = [], utter = null;
+var curTab = 'text', curMode = 'read', curProv = 'groq';
+var finalText = '';
+var isPaused = false;
+var progTimer = null;
+var seekFrac = 0;
+var totalSecs = 0;
+var startedAt = 0;
+
+// ── init after DOM + voices ready ────────────────────────────────────────
+window.addEventListener('load', function () {
+  synth = window.speechSynthesis;
+  loadVoices();
+  if (synth.onvoiceschanged !== undefined) {
+    synth.onvoiceschanged = loadVoices;
+  }
+});
+
+// ── voice loader ─────────────────────────────────────────────────────────
+function loadVoices() {
+  var all = synth.getVoices();
+  voices = all.filter(function (v) { return /^en/i.test(v.lang); });
+  if (!voices.length) voices = all;
+  var sel = document.getElementById('voiceSel');
+  sel.innerHTML = voices.map(function (v, i) {
+    return '<option value="' + i + '">' + v.name + ' (' + v.lang + ')</option>';
+  }).join('');
+  var pref = voices.findIndex(function (v) {
+    return /samantha|karen|daniel|moira|victoria|alex|google us english/i.test(v.name);
+  });
+  if (pref >= 0) sel.value = pref;
+}
+
+function getVoice() { return voices[+document.getElementById('voiceSel').value] || null; }
+function getRate()  { return parseFloat(document.getElementById('spdSlider').value); }
+
+// ── tab / mode / provider ────────────────────────────────────────────────
+function switchTab(t) {
+  curTab = t;
+  document.getElementById('tabText').classList.toggle('on', t === 'text');
+  document.getElementById('tabUrl').classList.toggle('on', t === 'url');
+  document.getElementById('textWrap').style.display = t === 'text' ? '' : 'none';
+  document.getElementById('urlWrap').style.display  = t === 'url'  ? '' : 'none';
+}
+
+function setMode(m) {
+  curMode = m;
+  document.getElementById('modeRead').classList.toggle('on', m === 'read');
+  document.getElementById('modeSum').classList.toggle('on', m === 'sum');
+  // ai section always visible — key needed for both modes
+  document.getElementById('goBtnLabel').textContent =
+    m === 'read' ? 'Extract & Read Aloud' : 'Summarise & Read Aloud';
+}
+
+function setProv(p) {
+  curProv = p;
+  document.getElementById('provGroq').classList.toggle('on', p === 'groq');
+  document.getElementById('provGemini').classList.toggle('on', p === 'gemini');
+  document.getElementById('apiKey').placeholder = p === 'groq' ? 'gsk_…' : 'AIza…';
+  document.getElementById('apiNote').innerHTML = p === 'groq'
+    ? 'Get a <strong>free</strong> Groq key (no credit card) at <a href="https://console.groq.com" target="_blank">console.groq.com</a> → API Keys.'
+    : 'Get a <strong>free</strong> Gemini key at <a href="https://aistudio.google.com/app/apikey" target="_blank">aistudio.google.com</a> → Get API Key.';
+}
+
+// ── status ───────────────────────────────────────────────────────────────
+function setStatus(msg, type) {
+  var el = document.getElementById('status');
+  el.textContent = msg;
+  el.className = 'status show ' + type;
+}
+
+// ── main action ──────────────────────────────────────────────────────────
+function go() {
+  stopAll();
+  var btn = document.getElementById('goBtn');
+  btn.disabled = true;
+  btn.classList.add('loading');
+  document.getElementById('outCard').classList.remove('show');
+  setStatus('⏳ Working…', 'info');
+
+  getSourceText()
+    .then(function (text) {
+      if (curMode === 'sum') {
+        var key = document.getElementById('apiKey').value.trim();
+        return summarise(text, key);
+      }
+      return text;
+    })
+    .then(function (text) {
+      finalText = text;
+      renderOutput(text);
+      setStatus('✅ Ready — press ▶ to listen  (' + wcount(text).toLocaleString() + ' words)', 'ok');
+      document.getElementById('player').classList.add('show');
+      setProg(0);
+    })
+    .catch(function (e) {
+      setStatus('❌ ' + e.message, 'err');
+    })
+    .finally(function () {
+      btn.disabled = false;
+      btn.classList.remove('loading');
+    });
+}
+
+// ── AI-powered text extraction ───────────────────────────────────────────
+function aiExtract(raw, key) {
+  setStatus('⏳ Sending to AI for clean extraction…', 'info');
+  var prompt = 'The following is raw text copied from a webpage. It contains navigation menus, cookie banners, ads, share buttons, subscription prompts, timestamps, author bylines, and other website UI noise mixed in with the actual article content.\n\nYour job: extract ONLY the main article body text. Remove every piece of website UI, navigation, headers, footers, ads, and boilerplate. Return only clean flowing prose — the actual article sentences and paragraphs. Do not summarise, do not add anything. Just return the clean article text, preserving the original wording.\n\nRaw text:\n\n' + raw.slice(0, 10000);
+  if (curProv === 'groq') return callGroq(prompt, key);
+  return callGemini(prompt, key);
+}
+
+// ── source text ──────────────────────────────────────────────────────────
+function getSourceText() {
+  var key = document.getElementById('apiKey').value.trim();
+  if (!key) return Promise.reject(new Error('Please paste your API key — it is needed for both text extraction and summarisation.'));
+
+  if (curTab === 'text') {
+    var t = document.getElementById('textInput').value.trim();
+    if (!t) return Promise.reject(new Error('Please paste some text first.'));
+    return aiExtract(t, key);
+  }
+
+  var url = document.getElementById('urlInput').value.trim();
+  if (!url) return Promise.reject(new Error('Please enter a URL.'));
+  if (!/^https?:\/\//i.test(url)) return Promise.reject(new Error('URL must start with http:// or https://'));
+  setStatus('⏳ Fetching page via proxy…', 'info');
+  return fetch('https://api.allorigins.win/get?url=' + encodeURIComponent(url))
+    .then(function(r) {
+      if (!r.ok) throw new Error('Proxy request failed. Check the URL and try again.');
+      return r.json();
+    })
+    .then(function(json) {
+      if (!json.contents) throw new Error('Page returned empty content.');
+      // rough strip of html tags before sending to AI
+      var rough = json.contents.replace(/<[^>]+>/g, ' ').replace(/\s{2,}/g, ' ').trim();
+      if (rough.length < 80) throw new Error('Could not extract text from this page.');
+      return aiExtract(rough, key);
+    });
+}
+
+// ── AI summary ───────────────────────────────────────────────────────────
+function summarise(text, key) {
+  setStatus('⏳ Summarising with AI…', 'info');
+  var prompt = 'Summarise the following article in 3 to 5 flowing prose paragraphs suitable for reading aloud. No bullet points, no headers, only natural sentences.\n\n' + text.slice(0, 8000);
+  if (curProv === 'groq') return callGroq(prompt, key);
+  return callGemini(prompt, key);
+}
+
+// ── shared API callers ────────────────────────────────────────────────────
+function callGroq(prompt, key) {
+  return fetch('https://api.groq.com/openai/v1/chat/completions', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + key },
+    body: JSON.stringify({
+      model: 'llama3-8b-8192',
+      max_tokens: 1200,
+      messages: [
+        { role: 'system', content: 'You are a helpful assistant. Follow the user instruction precisely.' },
+        { role: 'user', content: prompt }
+      ]
+    })
+  })
+  .then(function(r) { return r.json().then(function(d) { return [r.ok, d]; }); })
+  .then(function(pair) {
+    var ok = pair[0], d = pair[1];
+    if (!ok) throw new Error('Groq: ' + (d.error && d.error.message ? d.error.message : JSON.stringify(d)));
+    var out = d.choices && d.choices[0] && d.choices[0].message && d.choices[0].message.content;
+    if (!out) throw new Error('Groq returned an empty response.');
+    return out.trim();
+  });
+}
+
+function callGemini(prompt, key) {
+  return fetch('https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=' + key, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ contents: [{ parts: [{ text: prompt }] }] })
+  })
+  .then(function(r) { return r.json().then(function(d) { return [r.ok, d]; }); })
+  .then(function(pair) {
+    var ok = pair[0], d = pair[1];
+    if (!ok) throw new Error('Gemini: ' + (d.error && d.error.message ? d.error.message : JSON.stringify(d)));
+    var out = d.candidates && d.candidates[0] && d.candidates[0].content &&
+              d.candidates[0].content.parts && d.candidates[0].content.parts[0] &&
+              d.candidates[0].content.parts[0].text;
+    if (!out) throw new Error('Gemini returned an empty response.');
+    return out.trim();
+  });
+}
+
+// ── render ───────────────────────────────────────────────────────────────
+function renderOutput(text) {
+  var paras = text.split(/\n\n+/).filter(function (p) { return p.trim(); });
+  document.getElementById('outBody').innerHTML = paras.map(function (p) {
+    return '<p>' + p.trim() + '</p>';
+  }).join('');
+  document.getElementById('outTitle').textContent = curMode === 'sum' ? 'AI Summary' : 'Extracted Text';
+  document.getElementById('wc').textContent = wcount(text).toLocaleString() + ' words';
+  document.getElementById('outCard').classList.add('show');
+}
+
+function wcount(t) { return t.trim().split(/\s+/).length; }
+
+// ── speed ────────────────────────────────────────────────────────────────
+function onSpd(v) {
+  document.getElementById('spdBadge').textContent = parseFloat(v).toFixed(1) + '×';
+}
+
+// ── playback ─────────────────────────────────────────────────────────────
+function togglePlay() {
+  if (!finalText) return;
+  if (synth.speaking && !isPaused) {
+    synth.pause();
+    isPaused = true;
+    stopTimer();
+    setPlayIcon('▶');
+    return;
+  }
+  if (isPaused) {
+    synth.resume();
+    isPaused = false;
+    startTimer();
+    setPlayIcon('⏸');
+    return;
+  }
+  speakFrom(seekFrac);
+}
+
+function speakFrom(frac) {
+  synth.cancel();
+  isPaused = false;
+
+  var words = finalText.trim().split(/\s+/);
+  var from  = Math.floor(frac * words.length);
+  var chunk = words.slice(from).join(' ');
+  var rate  = getRate();
+
+  utter = new SpeechSynthesisUtterance(chunk);
+  utter.rate  = rate;
+  utter.pitch = 1;
+  var v = getVoice();
+  if (v) utter.voice = v;
+
+  totalSecs = Math.round((words.length / (150 * rate)) * 60);
+  startedAt = Date.now();
+  seekFrac  = frac;
+
+  utter.onstart = function () {
+    startTimer();
+    setPlayIcon('⏸');
+  };
+
+  utter.onend = function () {
+    isPaused  = false;
+    seekFrac  = 0;
+    stopTimer();
+    setProg(1);
+    setPlayIcon('▶');
+    setStatus('✅ Finished — tap ▶ to replay', 'ok');
+  };
+
+  utter.onerror = function (e) {
+    if (e.error === 'interrupted' || e.error === 'canceled') return;
+    isPaused = false;
+    stopTimer();
+    setPlayIcon('▶');
+    setStatus('❌ Speech error: ' + e.error, 'err');
+  };
+
+  synth.speak(utter);
+}
+
+function setPlayIcon(icon) {
+  document.getElementById('playBtn').textContent = icon;
+}
+
+// ── progress timer ────────────────────────────────────────────────────────
+function startTimer() {
+  stopTimer();
+  progTimer = setInterval(function () {
+    if (!startedAt || totalSecs === 0) return;
+    var elapsed  = (Date.now() - startedAt) / 1000;
+    var fraction = Math.min(1, seekFrac + (elapsed / totalSecs) * (1 - seekFrac));
+    setProg(fraction);
+  }, 300);
+}
+
+function stopTimer() {
+  if (progTimer) { clearInterval(progTimer); progTimer = null; }
+}
+
+function setProg(f) {
+  f = Math.max(0, Math.min(1, f || 0));
+  document.getElementById('progFill').style.width = (f * 100) + '%';
+  var el = Math.round(f * totalSecs);
+  var rm = Math.round((1 - f) * totalSecs);
+  document.getElementById('tEl').textContent  = fmt(el);
+  document.getElementById('tRem').textContent = fmt(rm);
+}
+
+function fmt(s) {
+  s = Math.max(0, s);
+  return Math.floor(s / 60) + ':' + String(s % 60).padStart(2, '0');
+}
+
+// ── seek / skip ──────────────────────────────────────────────────────────
+function seek(e) {
+  var bar = document.getElementById('progBar');
+  var f   = Math.max(0, Math.min(1, (e.clientX - bar.getBoundingClientRect().left) / bar.offsetWidth));
+  var was = synth.speaking && !isPaused;
+  seekFrac = f;
+  startedAt = Date.now();
+  if (was) speakFrom(f); else setProg(f);
+}
+
+function rewind() {
+  var cur = parseFloat(document.getElementById('progFill').style.width || '0') / 100;
+  var f   = Math.max(0, cur - 0.07);
+  var was = synth.speaking && !isPaused;
+  seekFrac = f; startedAt = Date.now();
+  if (was) speakFrom(f); else setProg(f);
+}
+
+function ffwd() {
+  var cur = parseFloat(document.getElementById('progFill').style.width || '0') / 100;
+  var f   = Math.min(0.99, cur + 0.07);
+  var was = synth.speaking && !isPaused;
+  seekFrac = f; startedAt = Date.now();
+  if (was) speakFrom(f); else setProg(f);
+}
+
+function stopAll() {
+  if (synth) synth.cancel();
+  isPaused = false; seekFrac = 0;
+  stopTimer(); setProg(0); setPlayIcon('▶');
+}
+
+// ── PWA ──────────────────────────────────────────────────────────────────
+window.addEventListener('load', function () {
+  var mf = {
+    name:'ReadCast', short_name:'ReadCast', start_url:'.', display:'standalone',
+    background_color:'#f6f4f1', theme_color:'#ffffff',
+    icons:[{
+      src:"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 192 192'%3E%3Crect width='192' height='192' rx='40' fill='%232563a8'/%3E%3Ctext x='96' y='132' font-size='110' text-anchor='middle'%3E🎙%3C/text%3E%3C/svg%3E",
+      sizes:'192x192', type:'image/svg+xml'
+    }]
+  };
+  var ml = document.createElement('link');
+  ml.rel  = 'manifest';
+  ml.href = 'data:application/json,' + encodeURIComponent(JSON.stringify(mf));
+  document.head.appendChild(ml);
+
+  if ('serviceWorker' in navigator) {
+    var sw   = "self.addEventListener('fetch',function(){});";
+    var blob = new Blob([sw], { type:'application/javascript' });
+    navigator.serviceWorker.register(URL.createObjectURL(blob)).catch(function(){});
+  }
+});
+</script>
+</body>
+</html>
